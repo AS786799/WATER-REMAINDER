@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Water Intake Tracker</title>
+    <link rel="stylesheet" href="style.css" />
+    
+  </head>
+  <body>
+    <script src="index.js"></script>
+    <div class="container">
+      <h2>💧 Water Intake Based on BMI</h2>
+
+      <label for="weight">Weight (kg):</label>
+      <input type="number" id="weight" placeholder="e.g., 70" />
+
+      <label for="height">Height (cm):</label>
+      <input type="number" id="height" placeholder="e.g., 175" />
+
+      <label for="missedHours">Missed Drinking Hours (e.g., 2):</label>
+      <input type="number" id="missedHours"placeholder="Enter missed hours"min="0"/>
+
+      <label for="drank">Already Drank (ml):</label>
+      <input type="number"id="drank"placeholder="Enter already drank water"min="0" />
+
+      <button onclick="calculate()">Calculate</button>
+
+      <div class="result" id="result"></div>
+      <center><div class="footer">💙 Stay Hydrated & Healthy</div></center>
+    </div>
+
+    <script>
+      function calculate() {
+        const weight = parseFloat(document.getElementById("weight").value);
+        const height = parseFloat(document.getElementById("height").value);
+        const drank = parseFloat(document.getElementById("drank").value) || 0;
+        const missedHours =
+          parseInt(document.getElementById("missedHours").value) || 0;
+        const resultDiv = document.getElementById("result");
+
+        if (!weight || !height || weight <= 0 || height <= 0) {
+          resultDiv.innerHTML = "❗ Please enter valid weight and height.";
+          return;
+        }
+
+        const heightM = height / 100;
+        const bmi = weight / (heightM * heightM);
+        let waterPerKg = bmi < 18.5 ? 30 : bmi > 25 ? 40 : 35;
+
+        const totalWaterMl = weight * waterPerKg;
+        const totalWaterL = (totalWaterMl / 1000).toFixed(2);
+        const remainingWaterMl = Math.max(totalWaterMl - drank, 0);
+        const remainingWaterL = (remainingWaterMl / 1000).toFixed(2);
+
+        const startHour = 6;
+        const endHour = 23;
+        const totalHours = endHour - startHour + 1;
+        const waterPerHour = Math.floor(totalWaterMl / totalHours);
+
+        const adjustedWaterPerHour = Math.floor(
+          (totalWaterMl + missedHours * waterPerHour) / totalHours
+        );
+
+        // Health Tip
+        let healthTip = "";
+        if (bmi < 18.5) {
+          healthTip =
+            "🥗 You are underweight. Consider a nutritious, calorie-rich diet with regular meals.";
+        } else if (bmi <= 24.9) {
+          healthTip =
+            "💪 Your BMI is in the normal range. Maintain your current healthy habits!";
+        } else {
+          healthTip =
+            "⚖️ You are in the overweight range. Focus on portion control, regular exercise, and staying hydrated.";
+        }
+
+        // Motivational Quotes
+        const quotes = [
+          "💧 Every sip is a step to a healthier you!",
+          "🧠 Hydration boosts your brain power!",
+          "🌿 Water is life. Drink it in!",
+          "💪 Fuel your body with water, not just food!",
+          "⏰ Make water your hourly habit!",
+        ];
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+        let html = `
+    <strong>BMI:</strong> ${bmi.toFixed(1)}<br>
+    <strong>Total Recommended Water:</strong> ${totalWaterL} L (${totalWaterMl} ml)<br>
+    <strong>Already Drank:</strong> ${drank} ml<br>
+    <strong>Remaining:</strong> ${remainingWaterL} L (${remainingWaterMl} ml)<br><br>
+    <strong>🩺 Health Tip:</strong> <span class="health-tip">${healthTip}</span><br><br>
+    <strong>💧 Hourly Water Intake Plan (6:00 AM – 11:00 PM):</strong><br>
+    <table>
+      <tr>
+        <th>Time</th>
+        <th>Target Intake</th>
+      </tr>`;
+
+        for (let i = startHour; i <= endHour; i++) {
+          let hour12 = i % 12 === 0 ? 12 : i % 12;
+          let ampm = i < 12 ? "AM" : "PM";
+          let timeLabel = `${hour12}:00 ${ampm}`;
+          html += `<tr><td>${timeLabel}</td><td>${adjustedWaterPerHour} ml</td></tr>`;
+        }
+
+        html += `</table>
+    <div class="quote">🌟 ${randomQuote}</div>
+  `;
+        resultDiv.innerHTML = html;
+      }
+    </script>
+  </body>
+</html>
